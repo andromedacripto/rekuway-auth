@@ -16,6 +16,9 @@ export default tseslint.config(
       "**/build/**",
       "**/.next/**",
       "**/node_modules/**",
+      "apps/mobile/node_modules/**",
+      "apps/web/node_modules/**",
+      "apps/api/node_modules/**",
       "**/.expo/**",
       "**/coverage/**",
       "**/*.config.js",
@@ -57,12 +60,17 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-call": "error",
       "@typescript-eslint/no-floating-promises": "error",
       // Fastify (and many other frameworks) idiomatically accept async
-      // route handlers/hooks in positions typed to return `void`; the
-      // framework awaits them correctly. Disabling only the `arguments`
-      // check (not the whole rule) keeps real misuse — e.g. an async
-      // function assigned somewhere actually expecting a synchronous void
-      // return with no promise handling — caught everywhere else.
-      "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: { arguments: false } }],
+      // functions in positions typed to return `void` — as direct handler
+      // arguments (app.get(path, handler)) AND as object properties (e.g.
+      // { preHandler: someAsyncFn }). The framework awaits them correctly
+      // either way. Disabling only these two checks (not the whole rule)
+      // keeps real misuse — e.g. an async function assigned to a plain
+      // variable expected to be synchronous with no promise handling —
+      // caught everywhere else.
+      "@typescript-eslint/no-misused-promises": [
+        "error",
+        { checksVoidReturn: { arguments: false, properties: false } }
+      ],
       "@typescript-eslint/no-shadow": "error",
       "@typescript-eslint/consistent-type-imports": "error",
 

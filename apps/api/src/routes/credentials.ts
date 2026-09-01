@@ -6,7 +6,7 @@ import { logSecurityEvent } from "../lib/securityEvents.js";
 export function registerCredentialRoutes(app: FastifyInstance): void {
   app.get("/auth/credentials", { preHandler: requireSession }, async (req, reply) => {
     const credentials = await app.prisma.webAuthnCredential.findMany({
-      where: { userId: req.sessionUserId, revokedAt: null },
+      where: { userId: req.sessionUserId as string, revokedAt: null },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -28,7 +28,7 @@ export function registerCredentialRoutes(app: FastifyInstance): void {
     }
 
     const result = await app.prisma.webAuthnCredential.updateMany({
-      where: { id: parsed.data.id, userId: req.sessionUserId, revokedAt: null },
+      where: { id: parsed.data.id, userId: req.sessionUserId as string, revokedAt: null },
       data: { revokedAt: new Date() },
     });
 
@@ -36,7 +36,11 @@ export function registerCredentialRoutes(app: FastifyInstance): void {
       return reply.status(404).send({ code: "NOT_FOUND", message: "Credential not found." });
     }
 
-    await logSecurityEvent(app.prisma, { type: "CREDENTIAL_REVOKED", userId: req.sessionUserId }, req.ip);
+    await logSecurityEvent(
+      app.prisma,
+      { type: "CREDENTIAL_REVOKED", userId: req.sessionUserId },
+      req.ip,
+    );
     return reply.send({ revoked: true });
   });
 }

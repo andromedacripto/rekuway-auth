@@ -11,7 +11,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  // eslint-disable-next-line no-console -- fatal startup failure, before logger exists
   console.error("Fatal startup error:", err instanceof Error ? err.message : err);
   process.exitCode = 1;
 });

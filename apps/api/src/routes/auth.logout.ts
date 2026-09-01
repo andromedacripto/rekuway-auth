@@ -22,7 +22,10 @@ export function registerAuthLogoutRoutes(app: FastifyInstance, env: Env): void {
   });
 
   app.get("/auth/session", { preHandler: requireSession }, async (req, reply) => {
-    const user = await app.prisma.user.findUnique({ where: { id: req.sessionUserId } });
-    return reply.send({ userId: req.sessionUserId, email: user?.email });
+    // requireSession has already run and returned 401 if unset, so this is
+    // guaranteed to be a real user id — the cast documents that invariant.
+    const userId = req.sessionUserId as string;
+    const user = await app.prisma.user.findUnique({ where: { id: userId } });
+    return reply.send({ userId, email: user?.email });
   });
 }

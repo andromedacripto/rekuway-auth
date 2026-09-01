@@ -18,7 +18,12 @@ export async function logSecurityEvent(
   await prisma.securityEvent.create({
     data: {
       eventType: event.type,
-      userId: event.userId,
+      // Only include `userId` when it's actually defined. With
+      // exactOptionalPropertyTypes on, explicitly passing `userId: undefined`
+      // collides with Prisma's generated XOR input types and produces a
+      // spurious "not assignable to never" compile error — omitting the key
+      // entirely (rather than setting it to undefined) avoids that.
+      ...(event.userId ? { userId: event.userId } : {}),
       metadata: event.metadata ?? {},
       ipHash: ip ? hashIp(ip) : null,
     },

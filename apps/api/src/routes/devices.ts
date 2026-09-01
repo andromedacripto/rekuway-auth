@@ -6,7 +6,7 @@ import { logSecurityEvent } from "../lib/securityEvents.js";
 export function registerDeviceRoutes(app: FastifyInstance): void {
   app.get("/auth/devices", { preHandler: requireSession }, async (req, reply) => {
     const devices = await app.prisma.device.findMany({
-      where: { userId: req.sessionUserId, revokedAt: null },
+      where: { userId: req.sessionUserId as string, revokedAt: null },
       orderBy: { lastSeenAt: "desc" },
     });
     return reply.send({ devices });
@@ -19,7 +19,7 @@ export function registerDeviceRoutes(app: FastifyInstance): void {
     }
 
     const result = await app.prisma.device.updateMany({
-      where: { id: parsed.data.id, userId: req.sessionUserId, revokedAt: null },
+      where: { id: parsed.data.id, userId: req.sessionUserId as string, revokedAt: null },
       data: { revokedAt: new Date() },
     });
 
@@ -27,7 +27,11 @@ export function registerDeviceRoutes(app: FastifyInstance): void {
       return reply.status(404).send({ code: "NOT_FOUND", message: "Device not found." });
     }
 
-    await logSecurityEvent(app.prisma, { type: "SESSION_REVOKED", userId: req.sessionUserId }, req.ip);
+    await logSecurityEvent(
+      app.prisma,
+      { type: "SESSION_REVOKED", userId: req.sessionUserId },
+      req.ip,
+    );
     return reply.send({ revoked: true });
   });
 }
