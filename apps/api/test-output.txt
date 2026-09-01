@@ -1,0 +1,295 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mB:/Desktop/Dev/rekuway-auth/apps/api[39m
+
+{"level":30,"time":1788291479272,"pid":5968,"hostname":"Ricardo","reqId":"req-1","req":{"method":"GET","url":"/health","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291479292,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291479294,"pid":5968,"hostname":"Ricardo","reqId":"req-1","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291479298,"pid":5968,"hostname":"Ricardo","reqId":"req-1","res":{"statusCode":500},"responseTime":24.498000003397465,"msg":"request completed"}
+{"level":30,"time":1788291479306,"pid":5968,"hostname":"Ricardo","reqId":"req-2","req":{"method":"GET","url":"/ready","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291479373,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291479373,"pid":5968,"hostname":"Ricardo","reqId":"req-2","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291479374,"pid":5968,"hostname":"Ricardo","reqId":"req-2","res":{"statusCode":500},"responseTime":67.94099999964237,"msg":"request completed"}
+{"level":30,"time":1788291479378,"pid":5968,"hostname":"Ricardo","reqId":"req-3","req":{"method":"POST","url":"/auth/register/options","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291479491,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291479492,"pid":5968,"hostname":"Ricardo","reqId":"req-3","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291479492,"pid":5968,"hostname":"Ricardo","reqId":"req-3","res":{"statusCode":500},"responseTime":113.92729999870062,"msg":"request completed"}
+{"level":30,"time":1788291479495,"pid":5968,"hostname":"Ricardo","reqId":"req-4","req":{"method":"POST","url":"/auth/login/options","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291479658,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291479658,"pid":5968,"hostname":"Ricardo","reqId":"req-4","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291479658,"pid":5968,"hostname":"Ricardo","reqId":"req-4","res":{"statusCode":500},"responseTime":163.01749999821186,"msg":"request completed"}
+{"level":30,"time":1788291479664,"pid":5968,"hostname":"Ricardo","reqId":"req-5","req":{"method":"POST","url":"/auth/register/options","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291479666,"pid":5968,"hostname":"Ricardo","reqId":"req-5","err":"Reached the max retries per request limit (which is 3). Refer to \"maxRetriesPerRequest\" option for details.","msg":"unhandled error"}
+{"level":30,"time":1788291479666,"pid":5968,"hostname":"Ricardo","reqId":"req-5","res":{"statusCode":500},"responseTime":1.8509000018239021,"msg":"request completed"}
+{"level":30,"time":1788291479670,"pid":5968,"hostname":"Ricardo","reqId":"req-6","req":{"method":"POST","url":"/auth/register/options","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291479891,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291479891,"pid":5968,"hostname":"Ricardo","reqId":"req-6","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291479892,"pid":5968,"hostname":"Ricardo","reqId":"req-6","res":{"statusCode":500},"responseTime":221.50609999895096,"msg":"request completed"}
+{"level":30,"time":1788291479892,"pid":5968,"hostname":"Ricardo","reqId":"req-7","req":{"method":"POST","url":"/auth/register/options","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291480162,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291480162,"pid":5968,"hostname":"Ricardo","reqId":"req-7","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291480162,"pid":5968,"hostname":"Ricardo","reqId":"req-7","res":{"statusCode":500},"responseTime":269.6833999976516,"msg":"request completed"}
+{"level":30,"time":1788291480164,"pid":5968,"hostname":"Ricardo","reqId":"req-8","req":{"method":"POST","url":"/auth/login/options","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291480474,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291480475,"pid":5968,"hostname":"Ricardo","reqId":"req-8","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291480475,"pid":5968,"hostname":"Ricardo","reqId":"req-8","res":{"statusCode":500},"responseTime":311.237399995327,"msg":"request completed"}
+{"level":30,"time":1788291480477,"pid":5968,"hostname":"Ricardo","reqId":"req-9","req":{"method":"GET","url":"/health","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291480848,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291480849,"pid":5968,"hostname":"Ricardo","reqId":"req-9","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291480849,"pid":5968,"hostname":"Ricardo","reqId":"req-9","res":{"statusCode":500},"responseTime":372.4196999967098,"msg":"request completed"}
+{"level":30,"time":1788291480852,"pid":5968,"hostname":"Ricardo","reqId":"req-a","req":{"method":"GET","url":"/auth/session","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291480855,"pid":5968,"hostname":"Ricardo","reqId":"req-a","err":"Reached the max retries per request limit (which is 3). Refer to \"maxRetriesPerRequest\" option for details.","msg":"unhandled error"}
+{"level":30,"time":1788291480856,"pid":5968,"hostname":"Ricardo","reqId":"req-a","res":{"statusCode":500},"responseTime":4.086599998176098,"msg":"request completed"}
+{"level":30,"time":1788291480860,"pid":5968,"hostname":"Ricardo","reqId":"req-b","req":{"method":"GET","url":"/auth/devices","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291481270,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291481270,"pid":5968,"hostname":"Ricardo","reqId":"req-b","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291481270,"pid":5968,"hostname":"Ricardo","reqId":"req-b","res":{"statusCode":500},"responseTime":410.52769999951124,"msg":"request completed"}
+{"level":30,"time":1788291481273,"pid":5968,"hostname":"Ricardo","reqId":"req-c","req":{"method":"GET","url":"/auth/session","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291481741,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291481742,"pid":5968,"hostname":"Ricardo","reqId":"req-c","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291481742,"pid":5968,"hostname":"Ricardo","reqId":"req-c","res":{"statusCode":500},"responseTime":469.2208999991417,"msg":"request completed"}
+{"level":30,"time":1788291481743,"pid":5968,"hostname":"Ricardo","reqId":"req-d","req":{"method":"POST","url":"/auth/login/options","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291482259,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291482260,"pid":5968,"hostname":"Ricardo","reqId":"req-d","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291482260,"pid":5968,"hostname":"Ricardo","reqId":"req-d","res":{"statusCode":500},"responseTime":516.8986999988556,"msg":"request completed"}
+{"level":30,"time":1788291482261,"pid":5968,"hostname":"Ricardo","reqId":"req-e","req":{"method":"POST","url":"/auth/login/verify","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291482824,"pid":5968,"hostname":"Ricardo","err":"NOAUTH Authentication required.","msg":"redis error"}
+{"level":50,"time":1788291482824,"pid":5968,"hostname":"Ricardo","reqId":"req-e","err":"NOAUTH Authentication required.","msg":"unhandled error"}
+{"level":30,"time":1788291482825,"pid":5968,"hostname":"Ricardo","reqId":"req-e","res":{"statusCode":500},"responseTime":564.1708000004292,"msg":"request completed"}
+{"level":30,"time":1788291482827,"pid":5968,"hostname":"Ricardo","reqId":"req-f","req":{"method":"POST","url":"/auth/login/3touch/verify","hostname":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":50,"time":1788291482828,"pid":5968,"hostname":"Ricardo","reqId":"req-f","err":"Reached the max retries per request limit (which is 3). Refer to \"maxRetriesPerRequest\" option for details.","msg":"unhandled error"}
+{"level":30,"time":1788291482829,"pid":5968,"hostname":"Ricardo","reqId":"req-f","res":{"statusCode":500},"responseTime":2.2928000018000603,"msg":"request completed"}
+ [31m❯[39m test/http.test.ts [2m([22m[2m13 tests[22m[2m | [22m[31m11 failed[39m[2m)[22m[33m 3716[2mms[22m[39m
+[31m   [31m×[31m GET /health and /ready[2m > [22mhealth returns ok without touching the DB[90m 47[2mms[22m[31m[39m
+[31m     → expected 500 to be 200 // Object.is equality[39m
+[31m   [31m×[31m GET /health and /ready[2m > [22mready confirms DB and Redis connectivity[90m 70[2mms[22m[31m[39m
+[31m     → expected 500 to be 200 // Object.is equality[39m
+[31m   [31m×[31m Zod validation (spec section 25/26 — never trust client input)[2m > [22mrejects a malformed email on /auth/register/options[90m 117[2mms[22m[31m[39m
+[31m     → expected 500 to be 400 // Object.is equality[39m
+[31m   [31m×[31m Zod validation (spec section 25/26 — never trust client input)[2m > [22mrejects a missing body entirely[90m 165[2mms[22m[31m[39m
+[31m     → expected 500 to be 400 // Object.is equality[39m
+[31m   [31m×[31m Zod validation (spec section 25/26 — never trust client input)[2m > [22mrejects an oversized payload gracefully (no crash)[90m 10[2mms[22m[31m[39m
+[31m     → expected [ 400, 413 ] to include 500[39m
+   [33m[2m✓[22m[39m Enumeration protection (spec section 27)[2m > [22mregister/options responds identically in shape for new vs existing email [33m493[2mms[22m[39m
+[31m   [31m×[31m Enumeration protection (spec section 27)[2m > [22mlogin/options responds 200 with a valid shape even for a nonexistent user[33m 313[2mms[22m[31m[39m
+[31m     → expected 500 to be 200 // Object.is equality[39m
+   [33m[2m✓[22m[39m Security headers (spec section 30)[2m > [22mresponses include HSTS and no-sniff headers [33m374[2mms[22m[39m
+[31m   [31m×[31m Authenticated routes require a valid session (spec section 24)[2m > [22mrejects /auth/session without a cookie[90m 8[2mms[22m[31m[39m
+[31m     → expected 500 to be 401 // Object.is equality[39m
+[31m   [31m×[31m Authenticated routes require a valid session (spec section 24)[2m > [22mrejects /auth/devices without a cookie[33m 413[2mms[22m[31m[39m
+[31m     → expected 500 to be 401 // Object.is equality[39m
+[31m   [31m×[31m Authenticated routes require a valid session (spec section 24)[2m > [22mrejects a forged/unknown session cookie[33m 471[2mms[22m[31m[39m
+[31m     → expected 500 to be 401 // Object.is equality[39m
+[31m   [31m×[31m Login flow rejects a fabricated WebAuthn payload (no bypass)[2m > [22mlogin/verify fails cleanly on a syntactically valid but cryptographically fake credential[33m 1083[2mms[22m[31m[39m
+[31m     → expected 500 to be 400 // Object.is equality[39m
+[31m   [31m×[31m 3-Touch cannot be used without a prior WebAuthn-verified nonce (spec section 34)[2m > [22mrejects a bare 3-touch/verify call with a fabricated nonceId[90m 4[2mms[22m[31m[39m
+[31m     → expected 500 to be 400 // Object.is equality[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 11 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22mGET /health and /ready[2m > [22mhealth returns ok without touching the DB
+[31m[1mAssertionError[22m: expected 500 to be 200 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 200[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m test/http.test.ts:[2m24:28[22m[39m
+    [90m 22| [39m  [34mit[39m([32m"health returns ok without touching the DB"[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m 23| [39m    [35mconst[39m res [33m=[39m [35mawait[39m app[33m.[39m[34minject[39m({ method[33m:[39m [32m"GET"[39m[33m,[39m url[33m:[39m [32m"/health"[39m })[33m;[39m
+    [90m 24| [39m    [34mexpect[39m(res[33m.[39mstatusCode)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 25| [39m    [34mexpect[39m(res[33m.[39m[34mjson[39m())[33m.[39m[34mtoEqual[39m({ status[33m:[39m [32m"ok"[39m })[33m;[39m
+    [90m 26| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22mGET /health and /ready[2m > [22mready confirms DB and Redis connectivity
+[31m[1mAssertionError[22m: expected 500 to be 200 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 200[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m test/http.test.ts:[2m30:28[22m[39m
+    [90m 28| [39m  [34mit[39m([32m"ready confirms DB and Redis connectivity"[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m 29| [39m    [35mconst[39m res [33m=[39m [35mawait[39m app[33m.[39m[34minject[39m({ method[33m:[39m [32m"GET"[39m[33m,[39m url[33m:[39m [32m"/ready"[39m })[33m;[39m
+    [90m 30| [39m    [34mexpect[39m(res[33m.[39mstatusCode)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 31| [39m    [34mexpect[39m(res[33m.[39m[34mjson[39m())[33m.[39m[34mtoEqual[39m({ status[33m:[39m [32m"ready"[39m })[33m;[39m
+    [90m 32| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22mZod validation (spec section 25/26 — never trust client input)[2m > [22mrejects a malformed email on /auth/register/options
+[31m[1mAssertionError[22m: expected 500 to be 400 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 400[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m test/http.test.ts:[2m42:28[22m[39m
+    [90m 40| [39m      payload[33m:[39m { email[33m:[39m [32m"not-an-email"[39m }[33m,[39m
+    [90m 41| [39m    })[33m;[39m
+    [90m 42| [39m    [34mexpect[39m(res[33m.[39mstatusCode)[33m.[39m[34mtoBe[39m([34m400[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 43| [39m    [34mexpect[39m(res[33m.[39m[34mjson[39m()[33m.[39mcode)[33m.[39m[34mtoBe[39m([32m"VALIDATION_ERROR"[39m)[33m;[39m
+    [90m 44| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22mZod validation (spec section 25/26 — never trust client input)[2m > [22mrejects a missing body entirely
+[31m[1mAssertionError[22m: expected 500 to be 400 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 400[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m test/http.test.ts:[2m48:28[22m[39m
+    [90m 46| [39m  [34mit[39m([32m"rejects a missing body entirely"[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m 47| [39m    [35mconst[39m res [33m=[39m [35mawait[39m app[33m.[39m[34minject[39m({ method[33m:[39m [32m"POST"[39m[33m,[39m url[33m:[39m [32m"/auth/login/o[39m…
+    [90m 48| [39m    [34mexpect[39m(res[33m.[39mstatusCode)[33m.[39m[34mtoBe[39m([34m400[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 49| [39m  })[33m;[39m
+    [90m 50| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22mZod validation (spec section 25/26 — never trust client input)[2m > [22mrejects an oversized payload gracefully (no crash)
+[31m[1mAssertionError[22m: expected [ 400, 413 ] to include 500[39m
+[36m [2m❯[22m test/http.test.ts:[2m57:24[22m[39m
+    [90m 55| [39m      payload[33m:[39m { email[33m:[39m [32m"a"[39m[33m.[39m[34mrepeat[39m([34m2_000_000[39m) [33m+[39m [32m"@example.com"[39m }[33m,[39m
+    [90m 56| [39m    })[33m;[39m
+    [90m 57| [39m    [34mexpect[39m([[34m400[39m[33m,[39m [34m413[39m])[33m.[39m[34mtoContain[39m(res[33m.[39mstatusCode)[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m 58| [39m  })[33m;[39m
+    [90m 59| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22mEnumeration protection (spec section 27)[2m > [22mlogin/options responds 200 with a valid shape even for a nonexistent user
+[31m[1mAssertionError[22m: expected 500 to be 200 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 200[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m test/http.test.ts:[2m78:28[22m[39m
+    [90m 76| [39m      payload[33m:[39m { email[33m:[39m [32m"httptest+doesnotexist@example.com"[39m }[33m,[39m
+    [90m 77| [39m    })[33m;[39m
+    [90m 78| [39m    [34mexpect[39m(res[33m.[39mstatusCode)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 79| [39m    [34mexpect[39m(res[33m.[39m[34mjson[39m())[33m.[39m[34mtoHaveProperty[39m([32m"challengeId"[39m)[33m;[39m
+    [90m 80| [39m    [34mexpect[39m(res[33m.[39m[34mjson[39m())[33m.[39m[34mtoHaveProperty[39m([32m"options"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22mAuthenticated routes require a valid session (spec section 24)[2m > [22mrejects /auth/session without a cookie
+[31m[1mAssertionError[22m: expected 500 to be 401 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 401[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m test/http.test.ts:[2m95:28[22m[39m
+    [90m 93| [39m  [34mit[39m([32m"rejects /auth/session without a cookie"[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m 94| [39m    [35mconst[39m res [33m=[39m [35mawait[39m app[33m.[39m[34minject[39m({ method[33m:[39m [32m"GET"[39m[33m,[39m url[33m:[39m [32m"/auth/session"[39m…
+    [90m 95| [39m    [34mexpect[39m(res[33m.[39mstatusCode)[33m.[39m[34mtoBe[39m([34m401[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 96| [39m  })[33m;[39m
+    [90m 97| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22mAuthenticated routes require a valid session (spec section 24)[2m > [22mrejects /auth/devices without a cookie
+[31m[1mAssertionError[22m: expected 500 to be 401 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 401[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m test/http.test.ts:[2m100:28[22m[39m
+    [90m 98| [39m  [34mit[39m([32m"rejects /auth/devices without a cookie"[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m 99| [39m    [35mconst[39m res [33m=[39m [35mawait[39m app[33m.[39m[34minject[39m({ method[33m:[39m [32m"GET"[39m[33m,[39m url[33m:[39m [32m"/auth/devices"[39m…
+    [90m100| [39m    [34mexpect[39m(res[33m.[39mstatusCode)[33m.[39m[34mtoBe[39m([34m401[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m101| [39m  })[33m;[39m
+    [90m102| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22mAuthenticated routes require a valid session (spec section 24)[2m > [22mrejects a forged/unknown session cookie
+[31m[1mAssertionError[22m: expected 500 to be 401 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 401[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m test/http.test.ts:[2m109:28[22m[39m
+    [90m107| [39m      headers[33m:[39m { cookie[33m:[39m [32m"rekuway_session=totally-forged-value"[39m }[33m,[39m
+    [90m108| [39m    })[33m;[39m
+    [90m109| [39m    [34mexpect[39m(res[33m.[39mstatusCode)[33m.[39m[34mtoBe[39m([34m401[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m110| [39m  })[33m;[39m
+    [90m111| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/11]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22mLogin flow rejects a fabricated WebAuthn payload (no bypass)[2m > [22mlogin/verify fails cleanly on a syntactically valid but cryptographically fake credential
+[31m[1mAssertionError[22m: expected 500 to be 400 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 400[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m test/http.test.ts:[2m142:28[22m[39m
+    [90m140| [39m    })[33m;[39m
+    [90m141| [39m
+    [90m142| [39m    [34mexpect[39m(res[33m.[39mstatusCode)[33m.[39m[34mtoBe[39m([34m400[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m143| [39m    [34mexpect[39m(res[33m.[39m[34mjson[39m()[33m.[39mcode)[33m.[39m[34mtoBe[39m([32m"AUTHENTICATION_FAILED"[39m)[33m;[39m
+    [90m144| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/11]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m test/http.test.ts[2m > [22m3-Touch cannot be used without a prior WebAuthn-verified nonce (spec section 34)[2m > [22mrejects a bare 3-touch/verify call with a fabricated nonceId
+[31m[1mAssertionError[22m: expected 500 to be 400 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 400[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m test/http.test.ts:[2m157:28[22m[39m
+    [90m155| [39m      }[33m,[39m
+    [90m156| [39m    })[33m;[39m
+    [90m157| [39m    [34mexpect[39m(res[33m.[39mstatusCode)[33m.[39m[34mtoBe[39m([34m400[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m158| [39m    [34mexpect[39m(res[33m.[39m[34mjson[39m()[33m.[39mcode)[33m.[39m[34mtoBe[39m([32m"AUTHENTICATION_FAILED"[39m)[33m;[39m
+    [90m159| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/11]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m11 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (13)[39m
+[2m   Start at [22m 15:37:56
+[2m   Duration [22m 6.13s[2m (transform 251ms, setup 52ms, collect 1.95s, tests 3.72s, environment 0ms, prepare 130ms)[22m
+

@@ -5,20 +5,26 @@ import { ChallengeStore } from "../src/lib/challengeStore.js";
 const redis = new Redis(process.env.REDIS_URL as string);
 const store = new ChallengeStore(redis);
 
+// A fake but plausible base64url-looking challenge, standing in for the
+// value @simplewebauthn/server would normally generate — the store itself
+// doesn't care about the format, only about lifecycle (single-use, TTL,
+// attempt limits), which is what these tests exercise.
+const FAKE_CHALLENGE = "R7E-7YrW262d0D_WXPg0rqdVOX8mdna6UPDSiqcDa-w";
+
 describe("ChallengeStore (Rekuway Challenge Layer)", () => {
   afterAll(async () => {
     await redis.quit();
   });
 
   it("creates a PENDING challenge with crypto-random material", async () => {
-    const challenge = await store.create("LOGIN", "user-1");
+    const challenge = await store.create("LOGIN", "user-1", FAKE_CHALLENGE);
     expect(challenge.status).toBe("PENDING");
     expect(challenge.challenge.length).toBeGreaterThan(20);
     expect(challenge.attemptCount).toBe(0);
   });
 
   it("consumes a challenge exactly once (single-use)", async () => {
-    const challenge = await store.create("LOGIN", "user-2");
+    const challenge = await store.create("LOGIN", "user-2", FAKE_CHALLENGE);
 
     const first = await store.consume(challenge.challengeId, "LOGIN");
     expect(first).not.toBeNull();
@@ -30,7 +36,7 @@ describe("ChallengeStore (Rekuway Challenge Layer)", () => {
   });
 
   it("detects replay after a challenge has been consumed", async () => {
-    const challenge = await store.create("LOGIN", "user-3");
+    const challenge = await store.create("LOGIN", "user-3", FAKE_CHALLENGE);
     await store.consume(challenge.challengeId, "LOGIN");
 
     const isReplay = await store.isReplay(challenge.challengeId);
@@ -38,13 +44,13 @@ describe("ChallengeStore (Rekuway Challenge Layer)", () => {
   });
 
   it("rejects a challenge used for the wrong purpose", async () => {
-    const challenge = await store.create("REGISTRATION", "user-4");
+    const challenge = await store.create("REGISTRATION", "user-4", FAKE_CHALLENGE);
     const consumed = await store.consume(challenge.challengeId, "LOGIN");
     expect(consumed).toBeNull();
   });
 
   it("marks a challenge expired once its TTL has passed", async () => {
-    const challenge = await store.create("LOGIN", "user-5");
+    const challenge = await store.create("LOGIN", "user-5", FAKE_CHALLENGE);
 
     // Force expiry by rewriting the stored metadata with a past expiresAt.
     const past = new Date(Date.now() - 1000).toISOString();
@@ -61,7 +67,7 @@ describe("ChallengeStore (Rekuway Challenge Layer)", () => {
   });
 
   it("blocks a challenge after exceeding max attempts", async () => {
-    const challenge = await store.create("LOGIN", "user-6");
+    const challenge = await store.create("LOGIN", "user-6", FAKE_CHALLENGE);
 
     let blocked = false;
     for (let i = 0; i < 6; i += 1) {
