@@ -1,0 +1,111 @@
+// Rekuway Auth — Prisma schema
+// PostgreSQL is the permanent store. Redis (see apps/api/src/plugins/redis.ts)
+// holds only temporary data: challenges, intermediate nonces, rate limits.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  credentials    WebAuthnCredential[]
+  touchSequence  TouchSequence?
+  devices        Device[]
+  sessions       Session[]
+  securityEvents SecurityEvent[]
+
+  @@index([email])
+}
+
+model WebAuthnCredential {
+  id           String    @id @default(uuid())
+  userId       String
+  credentialId String    @unique // base64url, from the authenticator
+  publicKey    Bytes
+  counter      BigInt    @default(0)
+  deviceType   String // "singleDevice" | "multiDevice"
+  backedUp     Boolean   @default(false)
+  transports   String[] // e.g. ["internal", "hybrid"]
+  aaguid       String?
+  deviceId     String?
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+// The 3-Touch sequence — stored ONLY as a bcrypt hash, never in plaintext.
+// Explicitly not treated as a cryptographic secret; see auth-core RiskEngine
+// and apps/api/src/lib/touchSequence.ts for how it is bound to a
+// WebAuthn-verified intermediate nonce before being accepted.
+model TouchSequence {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  sequenceHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Device {
+  id          String   @id @default(uuid())
+  userId      String
+  deviceName  String
+  platform    String // "web" | "android" | "ios" | "unknown"
+  lastSeenAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  revokedAt   DateTime?
+
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentials WebAuthnCredential[]
+  sessions    Session[]
+
+  @@index([userId])
+}
+
+model Session {
+  id        String    @id @default(uuid())
+  userId    String
+  deviceId  String?
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model SecurityEvent {
+  id        String   @id @default(uuid())
+  userId    String?
+  eventType String
+  // Non-secret contextual metadata only. Never passwords, tokens, keys,
+  // cookies, challenges, or biometric data (spec sections 31-32).
+  metadata  Json     @default("{}")
+  ipHash    String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([createdAt])
+}

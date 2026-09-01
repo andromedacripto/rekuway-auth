@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "Rekuway Auth",
+    "slug": "rekuway-auth",
+    "version": "0.1.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Usado para desbloquear sua credencial protegida no Keychain."
+      }
+    },
+    "android": {
+      "permissions": ["USE_BIOMETRIC", "USE_FINGERPRINT"]
+    }
+  }
+}

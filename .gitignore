@@ -1,0 +1,37 @@
+node_modules
+dist
+build
+.next
+out
+coverage
+
+# environment files — NEVER commit real secrets
+.env
+.env.local
+.env.*.local
+apps/api/.env
+apps/web/.env
+apps/web/.env.local
+
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+.DS_Store
+Thumbs.db
+
+.turbo
+*.tsbuildinfo
+
+# Prisma generated client and local migration lock artifacts are fine to
+# keep, but never commit a real database dump
+*.sqlite
+*.sqlite3
+
+.expo
+.expo-shared
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea

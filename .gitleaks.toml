@@ -1,0 +1,11 @@
+title = "Rekuway Auth gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Files that are safe to ignore"
+paths = [
+  '''\.env\.example$''',
+  '''README\.md$'''
+]
