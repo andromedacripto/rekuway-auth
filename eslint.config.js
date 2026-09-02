@@ -19,6 +19,7 @@ export default tseslint.config(
       "apps/mobile/node_modules/**",
       "apps/web/node_modules/**",
       "apps/api/node_modules/**",
+      "**/next-env.d.ts",
       "**/.expo/**",
       "**/coverage/**",
       "**/*.config.js",
