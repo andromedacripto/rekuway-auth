@@ -54,16 +54,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Prisma generate must run BEFORE lint/typecheck: without real
+      # generated types, @prisma/client falls back to an untyped stub and
+      # every Prisma call in the codebase becomes `any`, which cascades into
+      # dozens of spurious @typescript-eslint/no-unsafe-* errors that have
+      # nothing to do with real code issues.
+      - name: Prisma generate + migrate
+        run: |
+          pnpm --filter @rekuway/api exec prisma generate
+          pnpm --filter @rekuway/api exec prisma migrate deploy
+
       - name: Lint
         run: pnpm lint
 
       - name: Typecheck
         run: pnpm typecheck
-
-      - name: Prisma generate + migrate
-        run: |
-          pnpm --filter @rekuway/api exec prisma generate
-          pnpm --filter @rekuway/api exec prisma migrate deploy
 
       - name: Test
         run: pnpm test
