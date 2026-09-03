@@ -2,6 +2,7 @@ import { describe, it, expect, afterAll } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import Redis from "ioredis";
 import { SessionManager } from "../src/lib/sessionManager.js";
+import { createTestOrganization } from "./helpers.js";
 
 const prisma = new PrismaClient();
 const redis = new Redis(process.env.REDIS_URL as string);
@@ -10,12 +11,16 @@ const sessions = new SessionManager(prisma, redis);
 describe("SessionManager", () => {
   afterAll(async () => {
     await prisma.user.deleteMany({ where: { email: { contains: "sessiontest+" } } });
+    await prisma.organization.deleteMany({ where: { slug: { startsWith: "sessiontest-org-" } } });
     await prisma.$disconnect();
     await redis.quit();
   });
 
   it("creates a session and resolves it to the correct userId", async () => {
-    const user = await prisma.user.create({ data: { email: "sessiontest+1@example.com" } });
+    const org = await createTestOrganization(prisma, "sessiontest-org");
+    const user = await prisma.user.create({
+      data: { organizationId: org.id, email: "sessiontest+1@example.com" },
+    });
     const session = await sessions.create(user.id, null);
 
     const resolved = await sessions.resolve(session.id);
@@ -23,7 +28,10 @@ describe("SessionManager", () => {
   });
 
   it("revoked sessions no longer resolve", async () => {
-    const user = await prisma.user.create({ data: { email: "sessiontest+2@example.com" } });
+    const org = await createTestOrganization(prisma, "sessiontest-org");
+    const user = await prisma.user.create({
+      data: { organizationId: org.id, email: "sessiontest+2@example.com" },
+    });
     const session = await sessions.create(user.id, null);
 
     await sessions.revoke(session.id);
@@ -32,7 +40,10 @@ describe("SessionManager", () => {
   });
 
   it("revokeAllForUser invalidates every session for that user", async () => {
-    const user = await prisma.user.create({ data: { email: "sessiontest+3@example.com" } });
+    const org = await createTestOrganization(prisma, "sessiontest-org");
+    const user = await prisma.user.create({
+      data: { organizationId: org.id, email: "sessiontest+3@example.com" },
+    });
     const s1 = await sessions.create(user.id, null);
     const s2 = await sessions.create(user.id, null);
 

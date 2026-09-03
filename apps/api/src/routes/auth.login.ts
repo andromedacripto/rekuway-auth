@@ -15,6 +15,7 @@ import { logSecurityEvent } from "../lib/securityEvents.js";
 import { checkTouchSequence } from "../lib/touchSequence.js";
 import { checkAndIncrement } from "../lib/rateLimiter.js";
 import { SessionManager } from "../lib/sessionManager.js";
+import { resolveOrganizationBySlug } from "../lib/organization.js";
 import { SESSION_COOKIE_NAME } from "../plugins/session.js";
 import type { Env } from "@rekuway/config";
 
@@ -22,28 +23,41 @@ export function registerAuthLoginRoutes(app: FastifyInstance, env: Env): void {
   const challengeStore = new ChallengeStore(app.redis);
   const nonceStore = new IntermediateNonceStore(app.redis);
 
+  // POST /auth/login/options
   app.post("/auth/login/options", async (req, reply) => {
     const parsed = loginOptionsRequestSchema.safeParse(req.body);
     if (!parsed.success) {
       return reply.status(400).send({ code: "VALIDATION_ERROR", message: "Invalid input." });
     }
 
+    const org = await resolveOrganizationBySlug(app.prisma, parsed.data.organizationSlug);
+    if (!org) {
+      return reply.status(400).send({ code: "VALIDATION_ERROR", message: "Unknown organization." });
+    }
+
     const perUser = await checkAndIncrement(
       app.redis,
-      `ratelimit:login-options:${parsed.data.email}`,
+      `ratelimit:login-options:${org.id}:${parsed.data.email}`,
       RATE_LIMITS.perUser.max,
       RATE_LIMITS.perUser.windowSeconds,
     );
     if (!perUser.allowed) {
       await logSecurityEvent(app.prisma, { type: "RATE_LIMIT_TRIGGERED" }, req.ip);
-      return reply.status(429).send({ code: "RATE_LIMITED", message: "Too many attempts. Try again shortly." });
+      return reply
+        .status(429)
+        .send({ code: "RATE_LIMITED", message: "Too many attempts. Try again shortly." });
     }
 
     const user = await app.prisma.user.findUnique({
-      where: { email: parsed.data.email },
+      where: { organizationId_email: { organizationId: org.id, email: parsed.data.email } },
       include: { credentials: { where: { revokedAt: null } } },
     });
 
+    // Enumeration protection: always create a challenge and return options
+    // in the SAME shape, even when the user doesn't exist. The
+    // allowCredentials list is simply empty in that case, which is
+    // indistinguishable at the network/timing level from "user has no
+    // credentials yet" — a legitimate state.
     const options = await buildAuthenticationOptions({
       env,
       allowCredentials:
@@ -53,6 +67,8 @@ export function registerAuthLoginRoutes(app: FastifyInstance, env: Env): void {
         })) ?? [],
     });
 
+    // Persist the EXACT challenge the library generated and put on
+    // `options.challenge` — never re-derive or re-encode it ourselves.
     const challenge = await challengeStore.create("LOGIN", user?.id ?? null, options.challenge);
 
     await logSecurityEvent(app.prisma, { type: "AUTHENTICATION_STARTED" }, req.ip);
@@ -60,6 +76,9 @@ export function registerAuthLoginRoutes(app: FastifyInstance, env: Env): void {
     return reply.send({ challengeId: challenge.challengeId, options });
   });
 
+  // POST /auth/login/verify — verifies WebAuthn, then issues an
+  // intermediate nonce for the 3-Touch confirmation step. Does NOT create a
+  // session yet.
   app.post("/auth/login/verify", async (req, reply) => {
     const parsed = loginVerifyRequestSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -70,6 +89,14 @@ export function registerAuthLoginRoutes(app: FastifyInstance, env: Env): void {
       await logSecurityEvent(app.prisma, { type: "AUTHENTICATION_FAILED" }, req.ip);
     };
 
+    const org = await resolveOrganizationBySlug(app.prisma, parsed.data.organizationSlug);
+    if (!org) {
+      await fail();
+      return reply
+        .status(400)
+        .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+    }
+
     const consumed = await challengeStore.consume(parsed.data.challengeId, "LOGIN");
     if (!consumed) {
       const replay = await challengeStore.isReplay(parsed.data.challengeId);
@@ -77,13 +104,19 @@ export function registerAuthLoginRoutes(app: FastifyInstance, env: Env): void {
         await logSecurityEvent(app.prisma, { type: "CHALLENGE_REPLAY_DETECTED" }, req.ip);
       }
       await fail();
-      return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+      return reply
+        .status(400)
+        .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
     }
 
-    const user = await app.prisma.user.findUnique({ where: { email: parsed.data.email } });
+    const user = await app.prisma.user.findUnique({
+      where: { organizationId_email: { organizationId: org.id, email: parsed.data.email } },
+    });
     if (!user || user.id !== consumed.userId) {
       await fail();
-      return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+      return reply
+        .status(400)
+        .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
     }
 
     const credential = await app.prisma.webAuthnCredential.findUnique({
@@ -91,7 +124,9 @@ export function registerAuthLoginRoutes(app: FastifyInstance, env: Env): void {
     });
     if (!credential || credential.userId !== user.id || credential.revokedAt) {
       await fail();
-      return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+      return reply
+        .status(400)
+        .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
     }
 
     try {
@@ -106,13 +141,23 @@ export function registerAuthLoginRoutes(app: FastifyInstance, env: Env): void {
 
       if (!verification.verified) {
         await fail();
-        return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+        return reply
+          .status(400)
+          .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
       }
 
+      // Signature counter regression is a strong signal of a cloned
+      // authenticator (spec section 19/33) — reject and flag it.
       const newCounter = verification.authenticationInfo.newCounter;
       if (newCounter !== 0 && newCounter <= Number(credential.counter)) {
-        await logSecurityEvent(app.prisma, { type: "AUTHENTICATION_FAILED", userId: user.id }, req.ip);
-        return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+        await logSecurityEvent(
+          app.prisma,
+          { type: "AUTHENTICATION_FAILED", userId: user.id },
+          req.ip,
+        );
+        return reply
+          .status(400)
+          .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
       }
 
       await app.prisma.webAuthnCredential.update({
@@ -126,10 +171,15 @@ export function registerAuthLoginRoutes(app: FastifyInstance, env: Env): void {
     } catch (err) {
       req.log.warn({ err: (err as Error).message }, "authentication verification failed");
       await fail();
-      return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+      return reply
+        .status(400)
+        .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
     }
   });
 
+  // POST /auth/login/3touch/verify — the final step. Only accepts the
+  // sequence when bound to a nonce that WebAuthn already validated
+  // (spec sections 11/34). Creates the session on success.
   app.post("/auth/login/3touch/verify", async (req, reply) => {
     const parsed = verifyTouchSequenceRequestSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -138,7 +188,9 @@ export function registerAuthLoginRoutes(app: FastifyInstance, env: Env): void {
 
     const nonce = await nonceStore.consume(parsed.data.nonceId);
     if (!nonce) {
-      return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+      return reply
+        .status(400)
+        .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
     }
 
     const rl = await checkAndIncrement(
@@ -148,21 +200,37 @@ export function registerAuthLoginRoutes(app: FastifyInstance, env: Env): void {
       RATE_LIMITS.touchSequence.windowSeconds,
     );
     if (!rl.allowed) {
-      await logSecurityEvent(app.prisma, { type: "RATE_LIMIT_TRIGGERED", userId: nonce.userId }, req.ip);
-      return reply.status(429).send({ code: "RATE_LIMITED", message: "Too many attempts. Try again shortly." });
+      await logSecurityEvent(
+        app.prisma,
+        { type: "RATE_LIMIT_TRIGGERED", userId: nonce.userId },
+        req.ip,
+      );
+      return reply
+        .status(429)
+        .send({ code: "RATE_LIMITED", message: "Too many attempts. Try again shortly." });
     }
 
     const matches = await checkTouchSequence(app.prisma, nonce.userId, parsed.data.sequence);
     if (!matches) {
-      await logSecurityEvent(app.prisma, { type: "TOUCH_SEQUENCE_FAILED", userId: nonce.userId }, req.ip);
-      return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+      await logSecurityEvent(
+        app.prisma,
+        { type: "TOUCH_SEQUENCE_FAILED", userId: nonce.userId },
+        req.ip,
+      );
+      return reply
+        .status(400)
+        .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
     }
 
     const sessionManager = new SessionManager(app.prisma, app.redis);
     const session = await sessionManager.create(nonce.userId, null);
 
     await logSecurityEvent(app.prisma, { type: "SESSION_CREATED", userId: nonce.userId }, req.ip);
-    await logSecurityEvent(app.prisma, { type: "AUTHENTICATION_SUCCESS", userId: nonce.userId }, req.ip);
+    await logSecurityEvent(
+      app.prisma,
+      { type: "AUTHENTICATION_SUCCESS", userId: nonce.userId },
+      req.ip,
+    );
 
     void reply.setCookie(SESSION_COOKIE_NAME, session.id, {
       httpOnly: true,

@@ -6,15 +6,21 @@ import { z } from "zod";
 // without going through Zod first (spec sections 25 and 34).
 // -----------------------------------------------------------------------
 
-export const emailSchema = z
+export const emailSchema = z.string().trim().toLowerCase().email().max(254);
+
+// Identifies which client organization a request belongs to (pooled
+// multi-tenancy — see prisma/schema.prisma). URL-safe slug, e.g. "acme-corp".
+export const organizationSlugSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .email()
-  .max(254);
+  .min(2)
+  .max(63)
+  .regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, "Invalid organization identifier");
 
 export const registerOptionsRequestSchema = z.object({
   email: emailSchema,
+  organizationSlug: organizationSlugSchema,
 });
 
 // WebAuthn RegistrationResponseJSON — we validate shape loosely here and let
@@ -47,16 +53,19 @@ export const webAuthnAuthenticationResponseSchema = z.object({
 
 export const loginOptionsRequestSchema = z.object({
   email: emailSchema,
+  organizationSlug: organizationSlugSchema,
 });
 
 export const registerVerifyRequestSchema = z.object({
   email: emailSchema,
+  organizationSlug: organizationSlugSchema,
   challengeId: z.string().uuid(),
   credential: webAuthnRegistrationResponseSchema,
 });
 
 export const loginVerifyRequestSchema = z.object({
   email: emailSchema,
+  organizationSlug: organizationSlugSchema,
   challengeId: z.string().uuid(),
   credential: webAuthnAuthenticationResponseSchema,
 });
@@ -64,9 +73,20 @@ export const loginVerifyRequestSchema = z.object({
 // The 3-Touch sequence is 3 symbols out of a small fixed palette. Explicitly
 // NOT treated as a cryptographic secret (spec section 4/34) — it is bound to
 // an already-verified WebAuthn intermediate nonce.
-export const touchSymbolSchema = z.enum(["circle", "square", "triangle", "diamond", "cross", "star"]);
+export const touchSymbolSchema = z.enum([
+  "circle",
+  "square",
+  "triangle",
+  "diamond",
+  "cross",
+  "star",
+]);
 
-export const touchSequenceSchema = z.tuple([touchSymbolSchema, touchSymbolSchema, touchSymbolSchema]);
+export const touchSequenceSchema = z.tuple([
+  touchSymbolSchema,
+  touchSymbolSchema,
+  touchSymbolSchema,
+]);
 
 export const registerTouchSequenceRequestSchema = z.object({
   sequence: touchSequenceSchema,

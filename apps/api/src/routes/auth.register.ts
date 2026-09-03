@@ -13,6 +13,7 @@ import { logSecurityEvent } from "../lib/securityEvents.js";
 import { saveTouchSequence } from "../lib/touchSequence.js";
 import { requireSession } from "../lib/requireSession.js";
 import { SessionManager } from "../lib/sessionManager.js";
+import { resolveOrganizationBySlug } from "../lib/organization.js";
 import { SESSION_COOKIE_NAME } from "../plugins/session.js";
 import type { Env } from "@rekuway/config";
 
@@ -26,16 +27,28 @@ export function registerAuthRegisterRoutes(app: FastifyInstance, env: Env): void
       return reply.status(400).send({ code: "VALIDATION_ERROR", message: "Invalid input." });
     }
 
+    // Unknown organization is a hard rejection, not an enumeration risk —
+    // org slugs are provisioned deliberately (pnpm create:org) and are not
+    // secret or guessable-sensitive in the same way an individual's email is.
+    const org = await resolveOrganizationBySlug(app.prisma, parsed.data.organizationSlug);
+    if (!org) {
+      return reply.status(400).send({ code: "VALIDATION_ERROR", message: "Unknown organization." });
+    }
+
     // Enumeration protection (spec section 27): the response shape and
-    // status code are identical whether the email is new or already taken.
+    // status code are identical whether the email is new or already taken
+    // WITHIN this organization. If the user already exists we still issue
+    // real options bound to their existing credentials (so a legitimate
+    // re-registration/new-device flow works), but we never say "email
+    // already exists" vs "email is new".
     let user = await app.prisma.user.findUnique({
-      where: { email: parsed.data.email },
+      where: { organizationId_email: { organizationId: org.id, email: parsed.data.email } },
       include: { credentials: { where: { revokedAt: null } } },
     });
 
     if (!user) {
       user = await app.prisma.user.create({
-        data: { email: parsed.data.email },
+        data: { organizationId: org.id, email: parsed.data.email },
         include: { credentials: { where: { revokedAt: null } } },
       });
     }
@@ -66,18 +79,29 @@ export function registerAuthRegisterRoutes(app: FastifyInstance, env: Env): void
       return reply.status(400).send({ code: "VALIDATION_ERROR", message: "Invalid input." });
     }
 
+    const org = await resolveOrganizationBySlug(app.prisma, parsed.data.organizationSlug);
+    if (!org) {
+      return reply.status(400).send({ code: "VALIDATION_ERROR", message: "Unknown organization." });
+    }
+
     const consumed = await challengeStore.consume(parsed.data.challengeId, "REGISTRATION");
     if (!consumed) {
       const replay = await challengeStore.isReplay(parsed.data.challengeId);
       if (replay) {
         await logSecurityEvent(app.prisma, { type: "CHALLENGE_REPLAY_DETECTED" }, req.ip);
       }
-      return reply.status(400).send({ code: "CHALLENGE_INVALID", message: GENERIC_AUTH_FAILURE_MESSAGE });
+      return reply
+        .status(400)
+        .send({ code: "CHALLENGE_INVALID", message: GENERIC_AUTH_FAILURE_MESSAGE });
     }
 
-    const user = await app.prisma.user.findUnique({ where: { email: parsed.data.email } });
+    const user = await app.prisma.user.findUnique({
+      where: { organizationId_email: { organizationId: org.id, email: parsed.data.email } },
+    });
     if (!user || user.id !== consumed.userId) {
-      return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+      return reply
+        .status(400)
+        .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
     }
 
     try {
@@ -88,7 +112,9 @@ export function registerAuthRegisterRoutes(app: FastifyInstance, env: Env): void
       });
 
       if (!verification.verified || !verification.registrationInfo) {
-        return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+        return reply
+          .status(400)
+          .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
       }
 
       const { registrationInfo } = verification;
@@ -106,7 +132,11 @@ export function registerAuthRegisterRoutes(app: FastifyInstance, env: Env): void
         },
       });
 
-      await logSecurityEvent(app.prisma, { type: "CREDENTIAL_REGISTERED", userId: user.id }, req.ip);
+      await logSecurityEvent(
+        app.prisma,
+        { type: "CREDENTIAL_REGISTERED", userId: user.id },
+        req.ip,
+      );
 
       // Successful WebAuthn registration is itself strong proof of identity
       // (a brand-new credential bound to this user was just verified) — log
@@ -130,29 +160,27 @@ export function registerAuthRegisterRoutes(app: FastifyInstance, env: Env): void
       return reply.send({ verified: true });
     } catch (err) {
       req.log.warn({ err: (err as Error).message }, "registration verification failed");
-      return reply.status(400).send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
+      return reply
+        .status(400)
+        .send({ code: "AUTHENTICATION_FAILED", message: GENERIC_AUTH_FAILURE_MESSAGE });
     }
   });
 
   // POST /auth/register/touch-sequence — requires an active session, since
   // this is enrolling the UX layer for an already-authenticated user.
-  app.post(
-    "/auth/register/touch-sequence",
-    { preHandler: requireSession },
-    async (req, reply) => {
-      const parsed = registerTouchSequenceRequestSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return reply.status(400).send({ code: "VALIDATION_ERROR", message: "Invalid input." });
-      }
+  app.post("/auth/register/touch-sequence", { preHandler: requireSession }, async (req, reply) => {
+    const parsed = registerTouchSequenceRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply.status(400).send({ code: "VALIDATION_ERROR", message: "Invalid input." });
+    }
 
-      await saveTouchSequence(app.prisma, req.sessionUserId as string, parsed.data.sequence);
-      await logSecurityEvent(
-        app.prisma,
-        { type: "TOUCH_SEQUENCE_REGISTERED", userId: req.sessionUserId },
-        req.ip,
-      );
+    await saveTouchSequence(app.prisma, req.sessionUserId as string, parsed.data.sequence);
+    await logSecurityEvent(
+      app.prisma,
+      { type: "TOUCH_SEQUENCE_REGISTERED", userId: req.sessionUserId },
+      req.ip,
+    );
 
-      return reply.send({ saved: true });
-    },
-  );
+    return reply.send({ saved: true });
+  });
 }

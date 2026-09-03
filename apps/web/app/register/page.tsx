@@ -9,6 +9,7 @@ import { apiPost, ApiRequestError } from "../../lib/api";
 export default function RegisterPage(): JSX.Element {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [organizationSlug, setOrganizationSlug] = useState("");
   const [status, setStatus] = useState<{ kind: "idle" | "error" | "ok"; message: string }>({
     kind: "idle",
     message: "",
@@ -23,11 +24,11 @@ export default function RegisterPage(): JSX.Element {
       const { challengeId, options } = await apiPost<{
         challengeId: string;
         options: PublicKeyCredentialCreationOptionsJSON;
-      }>("/auth/register/options", { email });
+      }>("/auth/register/options", { email, organizationSlug });
 
       const credential = await startRegistration(options);
 
-      await apiPost("/auth/register/verify", { email, challengeId, credential });
+      await apiPost("/auth/register/verify", { email, organizationSlug, challengeId, credential });
 
       setStatus({ kind: "ok", message: "Credencial criada. Agora defina sua sequência 3-Touch." });
       router.push(`/auth/3touch?mode=enroll`);
@@ -48,6 +49,17 @@ export default function RegisterPage(): JSX.Element {
       <h1>Criar conta</h1>
       <div className="card">
         <div className="field">
+          <label htmlFor="organizationSlug">Identificador da empresa</label>
+          <input
+            id="organizationSlug"
+            type="text"
+            value={organizationSlug}
+            onChange={(e) => setOrganizationSlug(e.target.value)}
+            placeholder="acme-corp"
+            autoComplete="organization"
+          />
+        </div>
+        <div className="field">
           <label htmlFor="email">Email</label>
           <input
             id="email"
@@ -62,12 +74,15 @@ export default function RegisterPage(): JSX.Element {
           onClick={() => {
             void handleRegister();
           }}
-          disabled={loading || !email}
+          disabled={loading || !email || !organizationSlug}
         >
           {loading ? "Aguardando seu dispositivo…" : "Registrar com passkey"}
         </button>
         {status.kind !== "idle" && (
-          <p className={`status ${status.kind === "error" ? "error" : "ok"}`} style={{ marginTop: 16 }}>
+          <p
+            className={`status ${status.kind === "error" ? "error" : "ok"}`}
+            style={{ marginTop: 16 }}
+          >
             {status.message}
           </p>
         )}

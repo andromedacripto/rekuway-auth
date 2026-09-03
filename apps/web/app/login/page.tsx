@@ -9,6 +9,7 @@ import { apiPost, ApiRequestError } from "../../lib/api";
 export default function LoginPage(): JSX.Element {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [organizationSlug, setOrganizationSlug] = useState("");
   const [status, setStatus] = useState<{ kind: "idle" | "error" | "ok"; message: string }>({
     kind: "idle",
     message: "",
@@ -23,12 +24,13 @@ export default function LoginPage(): JSX.Element {
       const { challengeId, options } = await apiPost<{
         challengeId: string;
         options: PublicKeyCredentialRequestOptionsJSON;
-      }>("/auth/login/options", { email });
+      }>("/auth/login/options", { email, organizationSlug });
 
       const credential = await startAuthentication(options);
 
       const { nonceId } = await apiPost<{ nonceId: string }>("/auth/login/verify", {
         email,
+        organizationSlug,
         challengeId,
         credential,
       });
@@ -39,7 +41,9 @@ export default function LoginPage(): JSX.Element {
       router.push("/auth/3touch?mode=confirm");
     } catch (err) {
       const message =
-        err instanceof ApiRequestError ? err.message : "Não foi possível autenticar. Tente novamente.";
+        err instanceof ApiRequestError
+          ? err.message
+          : "Não foi possível autenticar. Tente novamente.";
       setStatus({ kind: "error", message });
     } finally {
       setLoading(false);
@@ -51,6 +55,17 @@ export default function LoginPage(): JSX.Element {
       <div className="wordmark">Rekuway Auth</div>
       <h1>Entrar</h1>
       <div className="card">
+        <div className="field">
+          <label htmlFor="organizationSlug">Identificador da empresa</label>
+          <input
+            id="organizationSlug"
+            type="text"
+            value={organizationSlug}
+            onChange={(e) => setOrganizationSlug(e.target.value)}
+            placeholder="acme-corp"
+            autoComplete="organization"
+          />
+        </div>
         <div className="field">
           <label htmlFor="email">Email</label>
           <input
@@ -66,12 +81,15 @@ export default function LoginPage(): JSX.Element {
           onClick={() => {
             void handleLogin();
           }}
-          disabled={loading || !email}
+          disabled={loading || !email || !organizationSlug}
         >
           {loading ? "Aguardando seu dispositivo…" : "Continuar com passkey"}
         </button>
         {status.kind !== "idle" && (
-          <p className={`status ${status.kind === "error" ? "error" : "ok"}`} style={{ marginTop: 16 }}>
+          <p
+            className={`status ${status.kind === "error" ? "error" : "ok"}`}
+            style={{ marginTop: 16 }}
+          >
             {status.message}
           </p>
         )}

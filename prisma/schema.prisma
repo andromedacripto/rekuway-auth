@@ -1,6 +1,15 @@
 // Rekuway Auth — Prisma schema
 // PostgreSQL is the permanent store. Redis (see apps/api/src/plugins/redis.ts)
 // holds only temporary data: challenges, intermediate nonces, rate limits.
+//
+// MULTI-TENANCY (pooled model, one shared database — same pattern used by
+// WorkOS, Clerk, and Auth0 for the vast majority of tenants): every User
+// belongs to exactly one Organization. Every child record (credentials,
+// devices, sessions, security events) is scoped transitively through
+// userId, so authenticated routes remain tenant-safe automatically as long
+// as registration/login always resolve users within the correct
+// Organization. Row-Level Security is layered on top in Postgres as
+// defense-in-depth — see prisma/migrations/<timestamp>_add_rls/migration.sql.
 
 generator client {
   provider = "prisma-client-js"
@@ -11,26 +20,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  // URL-safe identifier used to resolve tenant context at registration/login
+  // (e.g. shared domain `auth.rekuway.com` + this slug). Immutable in
+  // practice — changing it would break every WebAuthn RP association a
+  // client already holds pointed at the old value if it were ever embedded
+  // client-side, so treat it as a stable identifier once created.
+  slug      String   @unique
+  createdAt DateTime @default(now())
 
+  users User[]
+
+  @@index([slug])
+}
+
+model User {
+  id             String    @id @default(uuid())
+  organizationId String
+  email          String
+  emailVerified  Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   credentials    WebAuthnCredential[]
   touchSequence  TouchSequence?
   devices        Device[]
   sessions       Session[]
   securityEvents SecurityEvent[]
 
-  @@index([email])
+  // Email is unique WITHIN an organization, not globally — the same person
+  // (same email) can legitimately be a user of two different client
+  // companies without collision.
+  @@unique([organizationId, email])
+  @@index([organizationId])
 }
 
 model WebAuthnCredential {
   id           String    @id @default(uuid())
   userId       String
-  credentialId String    @unique // base64url, from the authenticator
+  // credentialId is inherent to WebAuthn/FIDO2 itself — authenticators
+  // generate it independent of any tenant, so it stays globally unique
+  // rather than scoped per-organization.
+  credentialId String    @unique
   publicKey    Bytes
   counter      BigInt    @default(0)
   deviceType   String // "singleDevice" | "multiDevice"

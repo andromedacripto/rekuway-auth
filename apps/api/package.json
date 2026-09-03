@@ -12,7 +12,8 @@
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "create:org": "tsx scripts/create-organization.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^9.4.0",

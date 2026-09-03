@@ -3,17 +3,23 @@ import type { FastifyInstance } from "fastify";
 import { PrismaClient } from "@prisma/client";
 import { buildServer } from "../src/server.js";
 import { loadEnv } from "@rekuway/config";
+import { createTestOrganization } from "./helpers.js";
 
 const prisma = new PrismaClient();
 let app: FastifyInstance;
+let orgSlug: string;
 
 beforeAll(async () => {
   app = await buildServer(loadEnv());
   await app.ready();
+
+  const org = await createTestOrganization(prisma, "httptest-org");
+  orgSlug = org.slug;
 });
 
 afterAll(async () => {
   await prisma.user.deleteMany({ where: { email: { contains: "httptest+" } } });
+  await prisma.organization.deleteMany({ where: { slug: { startsWith: "httptest-org-" } } });
   await prisma.$disconnect();
   await app.close();
 });
@@ -37,7 +43,7 @@ describe("Zod validation (spec section 25/26 — never trust client input)", () 
     const res = await app.inject({
       method: "POST",
       url: "/auth/register/options",
-      payload: { email: "not-an-email" },
+      payload: { email: "not-an-email", organizationSlug: orgSlug },
     });
     expect(res.statusCode).toBe(400);
     expect(res.json().code).toBe("VALIDATION_ERROR");
@@ -52,7 +58,7 @@ describe("Zod validation (spec section 25/26 — never trust client input)", () 
     const res = await app.inject({
       method: "POST",
       url: "/auth/register/options",
-      payload: { email: "a".repeat(2_000_000) + "@example.com" },
+      payload: { email: "a".repeat(2_000_000) + "@example.com", organizationSlug: orgSlug },
     });
     expect([400, 413]).toContain(res.statusCode);
   });
@@ -62,8 +68,16 @@ describe("Enumeration protection (spec section 27)", () => {
   it("register/options responds identically in shape for new vs existing email", async () => {
     const email = "httptest+enum1@example.com";
 
-    const first = await app.inject({ method: "POST", url: "/auth/register/options", payload: { email } });
-    const second = await app.inject({ method: "POST", url: "/auth/register/options", payload: { email } });
+    const first = await app.inject({
+      method: "POST",
+      url: "/auth/register/options",
+      payload: { email, organizationSlug: orgSlug },
+    });
+    const second = await app.inject({
+      method: "POST",
+      url: "/auth/register/options",
+      payload: { email, organizationSlug: orgSlug },
+    });
 
     expect(first.statusCode).toBe(second.statusCode);
     expect(Object.keys(first.json()).sort()).toEqual(Object.keys(second.json()).sort());
@@ -73,7 +87,7 @@ describe("Enumeration protection (spec section 27)", () => {
     const res = await app.inject({
       method: "POST",
       url: "/auth/login/options",
-      payload: { email: "httptest+doesnotexist@example.com" },
+      payload: { email: "httptest+doesnotexist@example.com", organizationSlug: orgSlug },
     });
     expect(res.statusCode).toBe(200);
     expect(res.json()).toHaveProperty("challengeId");
@@ -116,7 +130,7 @@ describe("Login flow rejects a fabricated WebAuthn payload (no bypass)", () => {
     const optionsRes = await app.inject({
       method: "POST",
       url: "/auth/login/options",
-      payload: { email },
+      payload: { email, organizationSlug: orgSlug },
     });
     const { challengeId } = optionsRes.json() as { challengeId: string };
 
@@ -125,13 +139,16 @@ describe("Login flow rejects a fabricated WebAuthn payload (no bypass)", () => {
       url: "/auth/login/verify",
       payload: {
         email,
+        organizationSlug: orgSlug,
         challengeId,
         credential: {
           id: "fake-credential-id",
           rawId: "ZmFrZQ",
           type: "public-key",
           response: {
-            clientDataJSON: Buffer.from(JSON.stringify({ type: "webauthn.get" })).toString("base64url"),
+            clientDataJSON: Buffer.from(JSON.stringify({ type: "webauthn.get" })).toString(
+              "base64url",
+            ),
             authenticatorData: "ZmFrZQ",
             signature: "ZmFrZQ",
           },

@@ -104,13 +104,14 @@ export default tseslint.config(
     }
   },
   {
-    // Config/build files and test files aren't included in any app's
-    // tsconfig "include" (which is scoped to "src" for correct rootDir/
-    // outDir behavior), so type-aware rules can't run on them. Lint them
-    // with the syntax-only rule set instead of failing to parse.
+    // Config/build files, test files, and standalone CLI scripts aren't
+    // included in any app's tsconfig "include" (scoped to "src" for correct
+    // rootDir/outDir behavior), so type-aware rules can't run on them. Lint
+    // them with the syntax-only rule set instead of failing to parse.
     files: [
       "**/*.test.ts",
       "**/test/**/*.ts",
+      "**/scripts/**/*.ts",
       "**/vitest.config.ts",
       "**/next.config.js",
       "eslint.config.js"
